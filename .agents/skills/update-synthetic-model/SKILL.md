@@ -13,14 +13,15 @@ Take initiative.
 
 Do not start by asking which model to update. First detect drift, then update whatever needs updating:
 
-1. Run the model test to find mismatches and new models.
-2. Read the current hardcoded definitions in `src/extensions/provider/models.ts`.
-3. Fetch live model data from:
+1. Run `pnpm install` to ensure local dependencies are up to date.
+2. Run the model test to find mismatches and new models.
+3. Read the current hardcoded definitions in `src/extensions/provider/models.ts`.
+4. Fetch live model data from:
    - `https://api.synthetic.new/openai/v1/models`
    - `https://models.dev/api.json`
-4. Reconcile the differences.
-5. Edit `src/extensions/provider/models.ts`.
-6. Re-run the relevant tests.
+5. Reconcile the differences.
+6. Edit `src/extensions/provider/models.ts`.
+7. Re-run the relevant tests.
 
 Only ask the user if there is a real blocker, such as missing credentials for runtime validation or conflicting evidence you cannot resolve.
 
@@ -36,9 +37,17 @@ Use these in order:
 
 ## Required workflow
 
+### 0) Install dependencies
+
+Run `pnpm install` first to ensure local dependencies are up to date:
+
+```bash
+pnpm install
+```
+
 ### 1) Start with tests
 
-Run the targeted model test first so you know what changed:
+Run the targeted model test so you know what changed:
 
 ```bash
 pnpm test -- src/extensions/provider/models.test.ts
@@ -217,7 +226,9 @@ When done:
 1. Ensure `src/extensions/provider/models.ts` is updated.
 2. Re-run `pnpm test -- src/extensions/provider/models.test.ts`.
 3. If the change is user-facing, prepare a changeset per repo conventions.
-4. Summarize what changed, including newly added, removed, or materially corrected models.
+4. Commit the model update and changeset. **Never use `--no-verify`.**
+5. If the pre-commit hooks fail (typecheck, lint, test), **stash the model changes** (`git stash`) and investigate the failing hook. Fix the underlying issue but **do not commit the fix yourself** — report the findings to the user and let them decide.
+6. Summarize what changed, including newly added, removed, or materially corrected models.
 
 ## Known repo paths
 
