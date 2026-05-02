@@ -210,13 +210,20 @@ export default async function (pi: ExtensionAPI) {
     void refresher.refreshFor(ctx);
   });
 
-  pi.on("session_switch", (_event, ctx) => {
-    currentContext = ctx;
-    currentProvider = ctx.model?.provider;
-    if (enabled && ctx.model?.provider === "synthetic") {
-      void refresher.refreshFor(ctx);
-    } else {
-      refresher.stopAutoRefresh(ctx);
+  pi.on("session_start", (event, ctx) => {
+    // Handle session switches (model_select handles mid-session provider changes)
+    if (
+      event.reason === "new" ||
+      event.reason === "resume" ||
+      event.reason === "fork"
+    ) {
+      currentContext = ctx;
+      currentProvider = ctx.model?.provider;
+      if (enabled && ctx.model?.provider === "synthetic") {
+        void refresher.refreshFor(ctx);
+      } else {
+        refresher.stopAutoRefresh(ctx);
+      }
     }
   });
 

@@ -208,11 +208,14 @@ If Synthetic rejects image input, keep `input: ["text"]`.
 
 Only add or change `compat` when live behavior, provider quirks, or current repo conventions require it.
 
-Useful fields in this repo:
+Model-level fields:
+
+- `thinkingLevelMap` — maps Pi thinking levels to provider-specific values; `null` hides a level from the UI
+
+Compat fields:
 
 - `supportsDeveloperRole`
 - `supportsReasoningEffort`
-- `reasoningEffortMap`
 - `maxTokensField`
 - `requiresToolResultName`
 - `requiresMistralToolIds`

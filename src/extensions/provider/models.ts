@@ -9,14 +9,6 @@ export interface SyntheticModelConfig extends ProviderModelConfig {
   provider: string;
 }
 
-const SYNTHETIC_REASONING_EFFORT_MAP = {
-  minimal: "low",
-  low: "low",
-  medium: "medium",
-  high: "high",
-  xhigh: "high",
-} as const;
-
 export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
   // API: hf:zai-org/GLM-4.7 → ctx=202752
   {
@@ -24,9 +16,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "zai-org/GLM-4.7",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
     },
     input: ["text"],
     cost: {
@@ -44,9 +36,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "zai-org/GLM-5",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
     },
     input: ["text"],
     cost: {
@@ -64,9 +56,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "zai-org/GLM-5.1",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
       supportsDeveloperRole: false,
     },
     input: ["text"],
@@ -85,9 +77,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "zai-org/GLM-4.7-Flash",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
     },
     input: ["text"],
     cost: {
@@ -104,7 +96,7 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     id: "hf:meta-llama/Llama-3.3-70B-Instruct",
     name: "meta-llama/Llama-3.3-70B-Instruct",
     provider: "together",
-    reasoning: true,
+    reasoning: false,
     input: ["text"],
     cost: {
       input: 0.88,
@@ -121,10 +113,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "deepseek-ai/DeepSeek-R1-0528",
     provider: "together",
     reasoning: true,
-    compat: {
-      supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
-    },
     input: ["text"],
     cost: {
       input: 3,
@@ -173,10 +161,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
     provider: "together",
     reasoning: true,
-    compat: {
-      supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
-    },
     input: ["text"],
     cost: {
       input: 2,
@@ -193,9 +177,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "moonshotai/Kimi-K2.6",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, low: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
     },
     input: ["text", "image"],
     cost: {
@@ -207,16 +191,28 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     contextWindow: 262144,
     maxTokens: 65536,
   },
+  // API: hf:moonshotai/Kimi-K2.5 → ctx=262144, out=65536
+  {
+    id: "hf:moonshotai/Kimi-K2.5",
+    name: "moonshotai/Kimi-K2.5",
+    provider: "together",
+    reasoning: true,
+    input: ["text", "image"],
+    cost: {
+      input: 0.5,
+      output: 2.8,
+      cacheRead: 0.5,
+      cacheWrite: 0,
+    },
+    contextWindow: 262144,
+    maxTokens: 65536,
+  },
   // API: hf:nvidia/Kimi-K2.5-NVFP4 → ctx=262144; models.dev: out=65536 (NVFP4 quantized)
   {
     id: "hf:nvidia/Kimi-K2.5-NVFP4",
     name: "nvidia/Kimi-K2.5-NVFP4",
     provider: "together",
     reasoning: true,
-    compat: {
-      supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
-    },
     input: ["text", "image"],
     cost: {
       input: 0.5,
@@ -249,10 +245,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "Qwen/Qwen3-235B-A22B-Thinking-2507",
     provider: "together",
     reasoning: true,
-    compat: {
-      supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
-    },
     input: ["text"],
     cost: {
       input: 0.65,
@@ -269,10 +261,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "Qwen/Qwen3.5-397B-A17B",
     provider: "together",
     reasoning: true,
-    compat: {
-      supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
-    },
     input: ["text", "image"],
     cost: {
       input: 0.6,
@@ -289,6 +277,7 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "MiniMaxAI/MiniMax-M2.5",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { off: null, minimal: null, low: null, xhigh: null },
     input: ["text"],
     cost: {
       input: 0.4,
@@ -300,7 +289,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     maxTokens: 65536,
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
       maxTokensField: "max_completion_tokens",
     },
   },
@@ -310,9 +298,9 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     name: "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
     provider: "synthetic",
     reasoning: true,
+    thinkingLevelMap: { minimal: null, low: null, xhigh: null },
     compat: {
       supportsReasoningEffort: true,
-      reasoningEffortMap: SYNTHETIC_REASONING_EFFORT_MAP,
     },
     input: ["text"],
     cost: {
