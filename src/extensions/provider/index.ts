@@ -27,6 +27,7 @@ import {
   type SyntheticQuotasRequestPayload,
 } from "../../types/quotas";
 import { fetchQuotas } from "../../utils/quotas";
+import { SYNTHETIC_OVERFLOW_PATTERN } from "./context-overflow";
 import { SYNTHETIC_MODELS } from "./models";
 
 export function buildSyntheticProviderModels(includeProxiedModels: boolean) {
@@ -109,6 +110,24 @@ export default async function (pi: ExtensionAPI) {
     if (ctx.model?.provider !== "synthetic") return;
     const quotas = parseQuotaHeader(event.headers);
     if (quotas) quotaStore.ingest(quotas, "header");
+  });
+
+  pi.on("message_end", (event) => {
+    const msg = event.message;
+    if (msg.role !== "assistant") return;
+    if (msg.stopReason !== "error") return;
+    if (msg.provider !== "synthetic") return;
+
+    const errorMessage = msg.errorMessage ?? "";
+    if (errorMessage.includes("context_length_exceeded")) return;
+    if (!SYNTHETIC_OVERFLOW_PATTERN.test(errorMessage)) return;
+
+    return {
+      message: {
+        ...msg,
+        errorMessage: `context_length_exceeded: ${errorMessage}`,
+      },
+    };
   });
 
   pi.events.on(SYNTHETIC_QUOTAS_REQUEST_EVENT, async (data: unknown) => {
