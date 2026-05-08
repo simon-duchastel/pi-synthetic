@@ -2,7 +2,7 @@
 // Source: https://api.synthetic.new/openai/v1/models
 // maxTokens sourced from https://models.dev/api.json (synthetic provider)
 
-import type { ProviderModelConfig } from "@mariozechner/pi-coding-agent";
+import type { ProviderModelConfig } from "@earendil-works/pi-coding-agent";
 
 export interface SyntheticModelConfig extends ProviderModelConfig {
   /** Upstream backend Synthetic proxies this model through (e.g. "fireworks", "together", "synthetic"). */

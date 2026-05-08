@@ -1,4 +1,7 @@
-import type { AuthStorage, ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type {
+  AuthStorage,
+  ExtensionAPI,
+} from "@earendil-works/pi-coding-agent";
 import {
   configLoader,
   emitSyntheticConfigUpdated,

@@ -5,9 +5,9 @@ import type {
   ExtensionContext,
   Theme,
   ToolRenderResultOptions,
-} from "@mariozechner/pi-coding-agent";
-import { getMarkdownTheme, keyHint } from "@mariozechner/pi-coding-agent";
-import { Container, Markdown, Text } from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-coding-agent";
+import { getMarkdownTheme, keyHint } from "@earendil-works/pi-coding-agent";
+import { Container, Markdown, Text } from "@earendil-works/pi-tui";
 import { type Static, Type } from "typebox";
 import { configLoader } from "../../config";
 import { getSyntheticApiKey } from "../../lib/env";

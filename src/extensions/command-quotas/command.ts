@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { configLoader } from "../../config";
 import { getSyntheticApiKey } from "../../lib/env";
 import { fetchQuotas } from "../../utils/quotas";
