@@ -15,6 +15,8 @@
  * 1. "Error from inference backend: 400 The input (N tokens) is longer
  *    than the model's context length (M tokens)."
  * 2. "Context limit exceeded"
+ * 3. "Error from inference backend: 400 status code (no body)"
+ *    — some backends return a bare 400 when the context is too long.
  */
 export const SYNTHETIC_OVERFLOW_PATTERN =
-  /input \(\d+ tokens\) is longer than the model's context length|Context limit exceeded/i;
+  /input \(\d+ tokens\) is longer than the model's context length|Context limit exceeded|400 status code \(no body\)/i;
