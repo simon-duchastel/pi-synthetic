@@ -91,38 +91,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     contextWindow: 196608,
     maxTokens: 65536,
   },
-  // models.dev: synthetic/hf:meta-llama/Llama-3.3-70B-Instruct → ctx=128000, out=32768
-  {
-    id: "hf:meta-llama/Llama-3.3-70B-Instruct",
-    name: "meta-llama/Llama-3.3-70B-Instruct",
-    provider: "together",
-    reasoning: false,
-    input: ["text"],
-    cost: {
-      input: 0.88,
-      output: 0.88,
-      cacheRead: 0.88,
-      cacheWrite: 0,
-    },
-    contextWindow: 131072,
-    maxTokens: 32768,
-  },
-  // models.dev: synthetic/hf:deepseek-ai/DeepSeek-R1-0528 → ctx=128000, out=128000
-  {
-    id: "hf:deepseek-ai/DeepSeek-R1-0528",
-    name: "deepseek-ai/DeepSeek-R1-0528",
-    provider: "together",
-    reasoning: true,
-    input: ["text"],
-    cost: {
-      input: 3,
-      output: 8,
-      cacheRead: 3,
-      cacheWrite: 0,
-    },
-    contextWindow: 131072,
-    maxTokens: 128000,
-  },
   // models.dev: synthetic/hf:deepseek-ai/DeepSeek-V3.2 → ctx=162816, out=8000
   {
     id: "hf:deepseek-ai/DeepSeek-V3.2",
@@ -190,70 +158,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
     },
     contextWindow: 262144,
     maxTokens: 65536,
-  },
-  // API: hf:moonshotai/Kimi-K2.5 → ctx=262144, out=65536
-  {
-    id: "hf:moonshotai/Kimi-K2.5",
-    name: "moonshotai/Kimi-K2.5",
-    provider: "together",
-    reasoning: true,
-    input: ["text", "image"],
-    cost: {
-      input: 0.5,
-      output: 2.8,
-      cacheRead: 0.5,
-      cacheWrite: 0,
-    },
-    contextWindow: 262144,
-    maxTokens: 65536,
-  },
-  // API: hf:nvidia/Kimi-K2.5-NVFP4 → ctx=262144; models.dev: out=65536 (NVFP4 quantized)
-  {
-    id: "hf:nvidia/Kimi-K2.5-NVFP4",
-    name: "nvidia/Kimi-K2.5-NVFP4",
-    provider: "together",
-    reasoning: true,
-    input: ["text", "image"],
-    cost: {
-      input: 0.5,
-      output: 2.8,
-      cacheRead: 0.5,
-      cacheWrite: 0,
-    },
-    contextWindow: 262144,
-    maxTokens: 65536,
-  },
-  // models.dev: synthetic/hf:deepseek-ai/DeepSeek-V3 → ctx=128000, out=128000
-  {
-    id: "hf:deepseek-ai/DeepSeek-V3",
-    name: "deepseek-ai/DeepSeek-V3",
-    provider: "together",
-    reasoning: true,
-    input: ["text"],
-    cost: {
-      input: 1.25,
-      output: 1.25,
-      cacheRead: 1.25,
-      cacheWrite: 0,
-    },
-    contextWindow: 131072,
-    maxTokens: 128000,
-  },
-  // models.dev: synthetic/hf:Qwen/Qwen3-235B-A22B-Thinking-2507 → ctx=256000, out=32000
-  {
-    id: "hf:Qwen/Qwen3-235B-A22B-Thinking-2507",
-    name: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-    provider: "together",
-    reasoning: true,
-    input: ["text"],
-    cost: {
-      input: 0.65,
-      output: 3,
-      cacheRead: 0.65,
-      cacheWrite: 0,
-    },
-    contextWindow: 262144,
-    maxTokens: 32000,
   },
   // API: hf:Qwen/Qwen3.5-397B-A17B → ctx=262144, out=65536
   {
