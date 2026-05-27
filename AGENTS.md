@@ -64,7 +64,8 @@ src/
 - Provider uses OpenAI-compatible API at `https://api.synthetic.new/openai/v1`
 - Models are hardcoded in `src/extensions/provider/models.ts`
 - The model `provider` field records the upstream backend Synthetic uses (`synthetic`, `fireworks`, `together`, etc.); `registerSyntheticProvider` strips it before registering models with Pi
-- `buildSyntheticProviderModels` filters the model list based on the `proxiedModels` config setting: when disabled, only models whose `provider` is `"synthetic"` are exposed
+- `buildSyntheticProviderModels` resolves aliases from their targets, then filters the model list based on the `proxiedModels` config setting: when disabled, only models whose `provider` is `"synthetic"` are exposed. Aliases always resolve with `provider: "synthetic"`, so they remain visible even when proxied models are hidden
+- Alias entries (`syn:*` IDs) are thin references. The `aliasFor` value maps to the `hugging_face_id` field from the Synthetic API (prefixed with `hf:`). All other fields are inherited from the target at build time
 - All user-facing model selection still uses the Pi provider name `synthetic`
 - Web search tool and quotas command are always registered; they fail at call time if credentials/subscription are missing
 - Error messages guide users to add credentials to `~/.pi/agent/auth.json` or set `SYNTHETIC_API_KEY`
@@ -72,7 +73,21 @@ src/
 
 ## Model Configuration
 
-Models are defined in `src/extensions/provider/models.ts` with the following structure:
+Entries in `src/extensions/provider/models.ts` are a union of concrete models and thin aliases.
+
+### Alias entry (at top of array)
+
+```typescript
+{
+  id: "syn:large:text",
+  name: "syn:large:text",
+  aliasFor: "hf:zai-org/GLM-5.1",  // resolves to concrete model at build time
+}
+```
+
+Alias entries have no `provider`, `cost`, `contextWindow`, `compat`, or `thinkingLevelMap` — these are inherited from the target at build time in `buildSyntheticProviderModels`. Aliases always resolve with `provider: "synthetic"`, so they are always visible regardless of the `proxiedModels` setting.
+
+### Concrete entry
 
 ```typescript
 {
@@ -89,7 +104,7 @@ Models are defined in `src/extensions/provider/models.ts` with the following str
   },
   contextWindow: 202752,
   maxTokens: 65536,
-  thinkingLevelMap?: { minimal?: null; low?: null; xhigh?: null; ... },
+  thinkingLevelMap?: { off?: "none" | null; minimal?: null; low?: null; medium?: "medium" | null; high?: null; xhigh?: null; ... },
   compat?: {        // Optional provider-specific compatibility flags
     supportsDeveloperRole?: boolean,
     supportsReasoningEffort?: boolean,
@@ -105,7 +120,18 @@ Get maxTokens from `https://models.dev/api.json` (synthetic provider).
 
 ## Adding Models
 
-Edit `src/extensions/provider/models.ts` and append to `SYNTHETIC_MODELS` array.
+### Adding a concrete model
+
+Append to `SYNTHETIC_MODELS` following the concrete entry shape above.
+
+### Adding an alias model
+
+Add a thin `{ id, name, aliasFor }` entry **at the top of the array**.
+
+- Set `id` and `name` from the Synthetic API
+- Set `aliasFor` to `"hf:" + hugging_face_id` from the Synthetic API
+- The resolved alias inherits all fields from the target at build time
+- When Synthetic changes which model an alias routes to, update only the `aliasFor` field
 
 ## Versioning
 

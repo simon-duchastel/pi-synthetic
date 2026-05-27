@@ -28,19 +28,46 @@ import {
 } from "../../types/quotas";
 import { fetchQuotas } from "../../utils/quotas";
 import { SYNTHETIC_OVERFLOW_PATTERN } from "./context-overflow";
-import { SYNTHETIC_MODELS } from "./models";
+import {
+  type ConcreteSyntheticModelConfig,
+  isAlias,
+  SYNTHETIC_MODELS,
+} from "./models";
 
 export function buildSyntheticProviderModels(includeProxiedModels: boolean) {
-  return SYNTHETIC_MODELS.filter(
-    (model) => includeProxiedModels || model.provider === "synthetic",
-  ).map(({ provider: _provider, ...model }) => ({
-    ...model,
-    compat: {
-      supportsDeveloperRole: false,
-      maxTokensField: "max_tokens" as const,
-      ...model.compat,
-    },
-  }));
+  const concreteModels = SYNTHETIC_MODELS.filter(
+    (m): m is ConcreteSyntheticModelConfig => !isAlias(m),
+  );
+  const byId = new Map(concreteModels.map((m) => [m.id, m]));
+
+  const resolved = SYNTHETIC_MODELS.map((entry) => {
+    if (!isAlias(entry)) return entry;
+
+    const target = byId.get(entry.aliasFor);
+    if (!target) {
+      throw new Error(
+        `Synthetic alias "${entry.id}" references missing model "${entry.aliasFor}"`,
+      );
+    }
+
+    return {
+      ...target,
+      id: entry.id,
+      name: entry.name,
+      provider: "synthetic" as const,
+    };
+  });
+
+  return resolved
+    .filter((model) => includeProxiedModels || model.provider === "synthetic")
+    .map(({ provider: _provider, ...model }) => ({
+      ...model,
+      compat: {
+        supportsDeveloperRole: false,
+        maxTokensField: "max_tokens" as const,
+        ...model.compat,
+      },
+    }));
 }
 
 interface RegisterSyntheticProviderOptions {

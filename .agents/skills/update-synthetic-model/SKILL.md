@@ -160,6 +160,35 @@ Cross-check these from models.dev:
 - Keep existing `compat` unless live behavior or current repo conventions show it should change.
 - Do not ask the user which models to update unless there is a true ambiguity you cannot resolve.
 
+### Alias models
+
+Synthetic exposes permanent aliases (IDs starting with `syn:`) that route to underlying concrete models. These are thin references — they have no `provider`, `cost`, `contextWindow`, or `compat` of their own.
+
+**Identifying aliases:** Query the API for entries with `hugging_face_id` where the ID does not start with `hf:`:
+
+```bash
+curl -s https://api.synthetic.new/openai/v1/models \
+  | jq '.data[] | select(.hugging_face_id != null and (.id | startswith("hf:") | not)) | {id, name, hugging_face_id}'
+```
+
+**Mapping:**
+- `id` -> `id` (keep the `syn:` prefix)
+- `name` -> `name`
+- `hugging_face_id` -> `aliasFor`, prefixed with `hf:` (e.g. `hugging_face_id: "zai-org/GLM-5.1"` becomes `aliasFor: "hf:zai-org/GLM-5.1"`)
+
+**Rules:**
+- `syn:*` entries must be at the top of `SYNTHETIC_MODELS` to stay visible regardless of `proxiedModels` setting
+- Alias entries are only `{ id, name, aliasFor }`. Do not copy `provider`, `cost`, `contextWindow`, `maxTokens`, `compat`, or `thinkingLevelMap` from the API
+- Alias metadata (`cost`, `contextWindow`, `compat`, `thinkingLevelMap`) is resolved at build time from the concrete target
+- Alias `provider` is always forced to `"synthetic"` at build time regardless of the target's actual `provider`
+- When Synthetic changes which model an alias routes to, update only the `aliasFor` field
+- If an alias's API-reported metadata diverges from its target's metadata (e.g. pricing, context length), alert the user — this likely means the alias should become a concrete entry or the target has changed
+
+**Reasoning level classification for aliases:**
+- Classify reasoning for the **concrete target model only**, not the alias
+- The alias inherits `thinkingLevelMap` and `compat.supportsReasoningEffort` from its target automatically
+- Do not set `thinkingLevelMap` or `compat` on alias entries
+
 ## Required runtime checks
 
 Do not rely only on metadata for `reasoning` or multimodal support when the evidence is mixed or when you are adding a new model with unclear behavior.
@@ -279,6 +308,8 @@ Compat fields:
 - `requiresMistralToolIds`
 
 Do not add `compat` by default.
+
+**Aliases inherit `compat` and `thinkingLevelMap` from their target.** Do not add `compat` or `thinkingLevelMap` to alias entries.
 
 ## Output expectations
 

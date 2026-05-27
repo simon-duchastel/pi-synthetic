@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SYNTHETIC_MODELS } from "./models";
+import { isAlias, SYNTHETIC_MODELS } from "./models";
 
 interface ApiModel {
   id: string;
@@ -74,6 +74,9 @@ function compareModels(
       });
       continue;
     }
+
+    // Skip field-by-field comparison for aliases — they inherit from their target
+    if (isAlias(hardcoded)) continue;
 
     // Check input modalities (text vs image support)
     const apiInputs = apiModel.input_modalities.sort();
@@ -172,7 +175,7 @@ function compareModels(
     }
   }
 
-  // Check for API models not in hardcoded list
+  // New API models not yet in hardcoded list are still flagged (including new syn:* aliases)
   for (const apiModel of apiModels) {
     const hardcoded = hardcodedModels.find((m) => m.id === apiModel.id);
     if (!hardcoded) {
@@ -213,5 +216,21 @@ describe("Synthetic models", () => {
     }
 
     expect(discrepancies).toHaveLength(0);
+  });
+
+  it("alias entries reference valid concrete models", () => {
+    const concreteById = new Map(
+      SYNTHETIC_MODELS.filter((m) => !isAlias(m)).map((m) => [m.id, m]),
+    );
+
+    const aliases = SYNTHETIC_MODELS.filter((m) => isAlias(m));
+    expect(aliases.length).toBeGreaterThan(0);
+
+    for (const alias of aliases) {
+      expect(
+        concreteById.has(alias.aliasFor),
+        `Alias "${alias.id}" references missing concrete model "${alias.aliasFor}"`,
+      ).toBe(true);
+    }
   });
 });

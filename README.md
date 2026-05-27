@@ -56,6 +56,8 @@ Once installed, select `synthetic` as your provider and choose from available mo
 
 All models are accessed through Synthetic's API. Some models are hosted by Synthetic directly (`provider: "synthetic"` in the model config); others are proxied by Synthetic to upstream backends such as Fireworks or Together.
 
+Synthetic also provides permanent aliases (`syn:large:text`, `syn:small:text`, `syn:large:vision`, `syn:small:vision`) that route to the current best model for each category. These aliases are stable across model rotations — using an alias means no reconfiguration when models change. Alias models are always visible even when Proxied Models is disabled.
+
 By default, new installs show only Synthetic-hosted models. You can enable proxied models in `/synthetic:settings` under **Models > Proxied Models**. Existing configurations keep proxied models enabled to preserve prior behavior.
 
 The `provider` field in `src/extensions/provider/models.ts` is for maintenance only and is stripped before registering models with Pi, so users always select the `synthetic` provider.
@@ -109,12 +111,23 @@ The **Proxied Models** setting is not a loadable extension feature. It is a regu
 
 ## Adding or Updating Models
 
-Models are hardcoded in `src/extensions/provider/models.ts`. To add or update models:
+Models are hardcoded in `src/extensions/provider/models.ts`. Entries are a union of concrete models and thin aliases (`syn:*` IDs).
+
+### Adding a concrete model
 
 1. Edit `src/extensions/provider/models.ts`
-2. Add the model configuration following the `SyntheticModelConfig` interface
+2. Append a concrete model following the `SyntheticModelConfig` interface
 3. Set `provider` to the upstream backend Synthetic uses for that model, such as `synthetic`, `fireworks`, or `together`
 4. Run `pnpm run typecheck` to verify
+
+### Adding an alias model
+
+1. Add a thin `{ id, name, aliasFor }` entry at the top of `SYNTHETIC_MODELS`
+2. Set `id` and `name` from the Synthetic API
+3. Set `aliasFor` to `"hf:" + hugging_face_id` from the Synthetic API
+4. The resolved alias inherits all fields from the target at build time
+
+When Synthetic changes which model an alias routes to, update only the `aliasFor` field.
 
 ## Development
 

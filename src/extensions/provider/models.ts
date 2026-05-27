@@ -9,7 +9,54 @@ export interface SyntheticModelConfig extends ProviderModelConfig {
   provider: string;
 }
 
-export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
+/** A thin alias that resolves to a concrete model at build time. */
+export interface SyntheticModelAliasConfig {
+  id: string;
+  name: string;
+  /** Full model ID of the concrete target this alias resolves to. */
+  aliasFor: string;
+}
+
+/** Concrete model with full spec; aliases are excluded. */
+export type ConcreteSyntheticModelConfig = SyntheticModelConfig & {
+  aliasFor?: never;
+};
+
+export function isAlias(
+  entry: ConcreteSyntheticModelConfig | SyntheticModelAliasConfig,
+): entry is SyntheticModelAliasConfig {
+  return "aliasFor" in entry;
+}
+
+export type SyntheticModelEntry =
+  | ConcreteSyntheticModelConfig
+  | SyntheticModelAliasConfig;
+
+export const SYNTHETIC_MODELS: SyntheticModelEntry[] = [
+  // API: syn:large:text → alias for hf:zai-org/GLM-5.1
+  {
+    id: "syn:large:text",
+    name: "syn:large:text",
+    aliasFor: "hf:zai-org/GLM-5.1",
+  },
+  // API: syn:small:text → alias for hf:zai-org/GLM-4.7-Flash
+  {
+    id: "syn:small:text",
+    name: "syn:small:text",
+    aliasFor: "hf:zai-org/GLM-4.7-Flash",
+  },
+  // API: syn:large:vision → alias for hf:moonshotai/Kimi-K2.6
+  {
+    id: "syn:large:vision",
+    name: "syn:large:vision",
+    aliasFor: "hf:moonshotai/Kimi-K2.6",
+  },
+  // API: syn:small:vision → alias for hf:moonshotai/Kimi-K2.6
+  {
+    id: "syn:small:vision",
+    name: "syn:small:vision",
+    aliasFor: "hf:moonshotai/Kimi-K2.6",
+  },
   // API: hf:zai-org/GLM-4.7 → ctx=202752
   {
     id: "hf:zai-org/GLM-4.7",
@@ -282,115 +329,6 @@ export const SYNTHETIC_MODELS: SyntheticModelConfig[] = [
       input: 0.3,
       output: 1,
       cacheRead: 0.3,
-      cacheWrite: 0,
-    },
-    contextWindow: 262144,
-    maxTokens: 65536,
-  },
-  // API: syn:large:text → alias for hf:zai-org/GLM-5.1 → ctx=196608, out=65536
-  {
-    id: "syn:large:text",
-    name: "syn:large:text",
-    provider: "synthetic",
-    reasoning: true,
-    thinkingLevelMap: {
-      off: "none",
-      minimal: null,
-      low: null,
-      medium: "medium",
-      high: null,
-      xhigh: null,
-    },
-    compat: {
-      supportsReasoningEffort: true,
-      supportsDeveloperRole: false,
-    },
-    input: ["text"],
-    cost: {
-      input: 1,
-      output: 3,
-      cacheRead: 1,
-      cacheWrite: 0,
-    },
-    contextWindow: 196608,
-    maxTokens: 65536,
-  },
-  // API: syn:small:text → alias for hf:zai-org/GLM-4.7-Flash → ctx=196608, out=65536
-  {
-    id: "syn:small:text",
-    name: "syn:small:text",
-    provider: "synthetic",
-    reasoning: true,
-    thinkingLevelMap: {
-      off: "none",
-      minimal: null,
-      low: null,
-      medium: "medium",
-      high: null,
-      xhigh: null,
-    },
-    compat: {
-      supportsReasoningEffort: true,
-    },
-    input: ["text"],
-    cost: {
-      input: 0.1,
-      output: 0.5,
-      cacheRead: 0.1,
-      cacheWrite: 0,
-    },
-    contextWindow: 196608,
-    maxTokens: 65536,
-  },
-  // API: syn:large:vision → alias for hf:moonshotai/Kimi-K2.6 → ctx=262144, out=65536
-  {
-    id: "syn:large:vision",
-    name: "syn:large:vision",
-    provider: "synthetic",
-    reasoning: true,
-    thinkingLevelMap: {
-      off: "none",
-      minimal: null,
-      low: null,
-      medium: "medium",
-      high: null,
-      xhigh: null,
-    },
-    compat: {
-      supportsReasoningEffort: true,
-    },
-    input: ["text", "image"],
-    cost: {
-      input: 0.95,
-      output: 4,
-      cacheRead: 0.95,
-      cacheWrite: 0,
-    },
-    contextWindow: 262144,
-    maxTokens: 65536,
-  },
-  // API: syn:small:vision → alias for hf:moonshotai/Kimi-K2.6 → ctx=262144, out=65536
-  {
-    id: "syn:small:vision",
-    name: "syn:small:vision",
-    provider: "synthetic",
-    reasoning: true,
-    thinkingLevelMap: {
-      off: "none",
-      minimal: null,
-      low: null,
-      medium: "medium",
-      high: null,
-      xhigh: null,
-    },
-    compat: {
-      supportsReasoningEffort: true,
-    },
-    input: ["text", "image"],
-    cost: {
-      input: 0.95,
-      output: 4,
-      cacheRead: 0.95,
       cacheWrite: 0,
     },
     contextWindow: 262144,
