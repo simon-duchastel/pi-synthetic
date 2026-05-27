@@ -184,6 +184,55 @@ JSON
 
 Treat `reasoning` as supported if the request succeeds and clearly accepts reasoning mode.
 
+### Reasoning level classification
+
+When adding or updating a reasoning model, determine whether it supports multiple reasoning levels or is binary on/off. This affects the `thinkingLevelMap` and `compat.supportsReasoningEffort` settings.
+
+Test the model with `reasoning_effort` set to `low`, `medium`, and `high`:
+
+```bash
+for effort in low medium high; do
+  echo "=== $effort ==="
+  curl -sS https://api.synthetic.new/openai/v1/chat/completions \
+    -H "Authorization: Bearer $SYNTHETIC_API_KEY" \
+    -H 'Content-Type: application/json' \
+    -d @- <<JSON
+{
+  "model": "MODEL_ID",
+  "messages": [{"role": "user", "content": "What is 17*23? Reply with just the number."}],
+  "reasoning_effort": "$effort",
+  "max_completion_tokens": 256
+}
+JSON
+done
+```
+
+Compare `reasoning_content` length and `reasoning_tokens` across the three levels:
+
+- **Multi-level**: `reasoning_content` length differs substantially across levels (e.g. 14c vs 208c vs 586c). No `thinkingLevelMap` needed; Pi's default level map applies.
+- **Binary on/off**: `reasoning_content` is either absent or roughly the same at all non-off levels. Set `thinkingLevelMap` to `{ off: "none", minimal: null, low: null, medium: "medium", high: null, xhigh: null }` so Pi presents a single reasoning toggle.
+
+Also test whether `reasoning_effort: "none"` actually disables reasoning:
+
+```bash
+curl -sS https://api.synthetic.new/openai/v1/chat/completions \
+  -H "Authorization: Bearer $SYNTHETIC_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d @- <<'JSON'
+{
+  "model": "MODEL_ID",
+  "messages": [{"role": "user", "content": "What is 17*23? Reply with just the number."}],
+  "reasoning_effort": "none",
+  "max_completion_tokens": 256
+}
+JSON
+```
+
+- If `reasoning_content` disappears and `reasoning_tokens` drops to 0: set `off: "none"` (Pi sends `reasoning_effort: "none"` when the user disables reasoning).
+- If the model still produces `reasoning_content` with `"none"`: set `off: null` (hides the "off" level from Pi's UI since the model cannot disable reasoning).
+
+When adding a `thinkingLevelMap`, also add `supportsReasoningEffort: true` to `compat` so Pi sends the `reasoning_effort` parameter.
+
 ### Image input check
 
 ```bash
