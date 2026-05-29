@@ -33,8 +33,9 @@
     "!src/**/*.test.ts"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "0.74.0",
-    "@earendil-works/pi-tui": "0.74.0"
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -56,12 +57,13 @@
     "@aliou/biome-plugins": "^0.8.1",
     "@biomejs/biome": "^2.4.15",
     "@changesets/cli": "^2.27.11",
-    "@earendil-works/pi-coding-agent": "0.74.0",
+    "@earendil-works/pi-coding-agent": "0.77.0",
     "typebox": "^1.1.37",
     "@types/node": "^25.0.10",
     "husky": "^9.1.7",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "@earendil-works/pi-tui": "0.77.0"
   },
   "pnpm": {
     "overrides": {
@@ -74,6 +76,9 @@
       "optional": true
     },
     "@earendil-works/pi-tui": {
+      "optional": true
+    },
+    "typebox": {
       "optional": true
     }
   },

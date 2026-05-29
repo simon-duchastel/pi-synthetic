@@ -41,7 +41,7 @@ pi install npm:@aliou/pi-synthetic
 pi install git:github.com/aliou/pi-synthetic
 
 # Local development
-pi -e ./src/index.ts
+pi -e .
 ```
 
 ## Usage
@@ -165,7 +165,7 @@ pnpm run test
 ### Test Locally
 
 ```bash
-pi -e ./src/index.ts
+pi -e .
 ```
 
 ## Release
@@ -180,7 +180,7 @@ This repository uses [Changesets](https://github.com/changesets/changesets) for 
 
 ## Requirements
 
-- Pi coding agent v0.72.0+
+- Pi coding agent v0.77.0+
 - Synthetic API key (configured in `~/.pi/agent/auth.json` or via `SYNTHETIC_API_KEY`)
 
 ## Links
