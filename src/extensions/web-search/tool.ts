@@ -5,8 +5,6 @@ import { join } from "node:path";
 import { ToolCallHeader, ToolFooter } from "@aliou/pi-utils-ui";
 import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
 import {
-  DEFAULT_MAX_BYTES,
-  DEFAULT_MAX_LINES,
   defineTool,
   formatSize,
   keyHint,
@@ -38,8 +36,6 @@ interface WebSearchResultDetails {
   tempFilePath?: string;
   totalLines: number;
   totalBytes: number;
-  outputLines: number;
-  outputBytes: number;
 }
 
 interface WebSearchDetails {
@@ -58,7 +54,7 @@ type SearchParamsType = Static<typeof SearchParams>;
 export const syntheticWebSearchTool = defineTool({
   name: SYNTHETIC_WEB_SEARCH_TOOL,
   label: "Synthetic: Web Search",
-  description: `Search the web using Synthetic's zero-data-retention API. Returns search results with titles, URLs, content snippets, and publication dates. Use for finding documentation, articles, recent information, or any web content. Results are fresh and not cached by Synthetic. Results are truncated to ${DEFAULT_MAX_LINES} lines or ${formatSize(DEFAULT_MAX_BYTES)} (whichever is hit first). If truncated, full output is saved to a temp file.`,
+  description: `Search the web using Synthetic's zero-data-retention API. Returns search results with titles, URLs, content snippets, and publication dates. Use for finding documentation, articles, recent information, or any web content. Results are fresh and not cached by Synthetic. Results exceeding 1000 lines or 25KB are saved to temp files and referenced inline (use the read tool to inspect). Shorter results are included inline.`,
   promptSnippet: "Search the web using Synthetic's zero-data-retention API",
   promptGuidelines: [
     "Use synthetic_web_search for finding documentation, articles, recent information, or any web content.",
@@ -123,26 +119,31 @@ export const syntheticWebSearchTool = defineTool({
         .replace(/(^-|-$)/g, "")
         .slice(0, 40);
       const truncation = truncateHead(result.text, {
-        maxLines: DEFAULT_MAX_LINES,
-        maxBytes: DEFAULT_MAX_BYTES,
+        maxLines: 1000,
+        maxBytes: 25_000,
       });
 
-      let preview = truncation.content;
+      let inline: string;
       let tempFilePath: string | undefined;
 
       if (truncation.truncated) {
+        // Result exceeds limits — write full content to a temp file
+        // and only reference it inline to avoid eating LLM context
         tempFilePath = join(
           tmpdir(),
           `pi-synthetic-search-${slug}-${randomBytes(4).toString("hex")}.md`,
         );
         await writeFile(tempFilePath, result.text, "utf8");
-        preview += `\n\n[Result truncated: ${truncation.outputLines} of ${truncation.totalLines} lines (${formatSize(truncation.outputBytes)} of ${formatSize(truncation.totalBytes)}). Full result: ${tempFilePath}]`;
+        inline = `[Result too large: ${truncation.totalLines} lines, ${formatSize(truncation.totalBytes)}. Full result saved to: ${tempFilePath}. Use the read tool to inspect it.]`;
+      } else {
+        // Result fits within limits — include inline
+        inline = truncation.content;
       }
 
       content += `## ${result.title}\n`;
       content += `URL: ${result.url}\n`;
       content += `Published: ${result.published}\n`;
-      content += `\n${preview}\n`;
+      content += `\n${inline}\n`;
       content += "\n---\n\n";
 
       resultDetails.push({
@@ -153,8 +154,6 @@ export const syntheticWebSearchTool = defineTool({
         tempFilePath,
         totalLines: truncation.totalLines,
         totalBytes: truncation.totalBytes,
-        outputLines: truncation.outputLines,
-        outputBytes: truncation.outputBytes,
       });
     }
 
@@ -214,7 +213,7 @@ export const syntheticWebSearchTool = defineTool({
       // Collapsed: show result count + first result title
       let text = theme.fg("success", `Found ${results.length} result(s)`);
       if (hasTruncation) {
-        text += theme.fg("warning", " (truncated)");
+        text += theme.fg("warning", " (offloaded)");
       }
       const first = results[0];
       if (first) {
@@ -258,7 +257,7 @@ export const syntheticWebSearchTool = defineTool({
         if (r.truncated) {
           container.addChild(
             new Text(
-              `  ${theme.fg("warning", `Truncated: ${r.outputLines} of ${r.totalLines} lines (${formatSize(r.outputBytes)} of ${formatSize(r.totalBytes)}). Full content: ${r.tempFilePath}`)}`,
+              `  ${theme.fg("warning", `Offloaded: ${r.totalLines} lines, ${formatSize(r.totalBytes)}. Full result: ${r.tempFilePath}`)}`,
               0,
               0,
             ),
@@ -275,7 +274,7 @@ export const syntheticWebSearchTool = defineTool({
     if (hasTruncation) {
       const truncatedCount = results.filter((r) => r.truncated).length;
       footerItems.push({
-        label: "truncated",
+        label: "offloaded",
         value: `${truncatedCount}`,
       });
     }
