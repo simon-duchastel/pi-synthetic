@@ -33,11 +33,11 @@ export type SyntheticModelEntry =
   | SyntheticModelAliasConfig;
 
 export const SYNTHETIC_MODELS: SyntheticModelEntry[] = [
-  // API: syn:large:text → alias for hf:zai-org/GLM-5.1
+  // API: syn:large:text → alias for hf:zai-org/GLM-5.2
   {
     id: "syn:large:text",
     name: "syn:large:text",
-    aliasFor: "hf:zai-org/GLM-5.1",
+    aliasFor: "hf:zai-org/GLM-5.2",
   },
   // API: syn:small:text → alias for hf:zai-org/GLM-4.7-Flash
   {
@@ -110,6 +110,44 @@ export const SYNTHETIC_MODELS: SyntheticModelEntry[] = [
       cacheWrite: 0,
     },
     contextWindow: 196608,
+    maxTokens: 65536,
+  },
+  // API: hf:zai-org/GLM-5.2 → ctx=524288, out=65536
+  // Reasoning: GLM-5.2 has only two effective levels — `max` (default, highest) and `high`
+  // (lower). Per the GLM-5.2 chat template: unset -> max; "high" -> high; every other value
+  // ("low", "medium", ...) falls through to max. So `max > high`.
+  // (https://docs.sglang.io/cookbook/autoregressive/GLM/GLM-5.2#hw=h200&variant=default&quant=fp8&strategy=low-latency&nodes=single)
+  //
+  // The Synthetic OpenAI shim validates `reasoning_effort` to the OpenAI enum and rejects
+  // literal `max` (and `xhigh` errors). To expose both tiers through Pi we map:
+  //   off    -> "none"      (disable thinking)
+  //   high   -> "high"       (High, lower)
+  //   xhigh  -> "medium"     (falls through to Max, highest)
+  // minimal/low/medium are hidden (null) so Pi's named levels aren't remapped unexpectedly.
+  {
+    id: "hf:zai-org/GLM-5.2",
+    name: "zai-org/GLM-5.2",
+    provider: "synthetic",
+    reasoning: true,
+    thinkingLevelMap: {
+      off: "none",
+      minimal: null,
+      low: null,
+      medium: null,
+      high: "high",
+      xhigh: "medium",
+    },
+    compat: {
+      supportsReasoningEffort: true,
+    },
+    input: ["text"],
+    cost: {
+      input: 1.4,
+      output: 4.4,
+      cacheRead: 1.4,
+      cacheWrite: 0,
+    },
+    contextWindow: 524288,
     maxTokens: 65536,
   },
   // API: hf:zai-org/GLM-4.7-Flash → ctx=196608
