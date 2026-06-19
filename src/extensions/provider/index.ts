@@ -194,9 +194,5 @@ export default async function (pi: ExtensionAPI) {
     currentAuthStorage = ctx.modelRegistry.authStorage;
     pi.events.emit(SYNTHETIC_EXTENSIONS_REQUEST_EVENT, undefined);
     emitSyntheticConfigUpdated(pi);
-
-    if (ctx.model?.provider === "synthetic") {
-      await quotaStore.refreshFromApi(fetchQuotasFromAuth);
-    }
   });
 }
