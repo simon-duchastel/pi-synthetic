@@ -274,7 +274,7 @@ export const SYNTHETIC_MODELS: SyntheticModelEntry[] = [
     contextWindow: 262144,
     maxTokens: 65536,
   },
-  // API: hf:MiniMaxAI/MiniMax-M3 → ctx=524288, out=65536
+  // API: hf:MiniMaxAI/MiniMax-M3 → ctx=262144, out=65536
   {
     id: "hf:MiniMaxAI/MiniMax-M3",
     name: "MiniMaxAI/MiniMax-M3",
@@ -299,7 +299,7 @@ export const SYNTHETIC_MODELS: SyntheticModelEntry[] = [
       cacheRead: 0.6,
       cacheWrite: 0,
     },
-    contextWindow: 524288,
+    contextWindow: 262144,
     maxTokens: 65536,
   },
   // API: hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4 → ctx=262144, out=65536
